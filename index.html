@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VEGBOX Gondal | તાજા શાકભાજી</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f8f0;color:#233528;font-family:Arial,sans-serif}
+header{background:#176b36;color:white;text-align:center;padding:22px 12px}
+header h1{font-size:35px;margin:0}
+header p{margin:7px 0}
+main{max-width:1000px;margin:auto;padding:14px}
+h2{color:#176b36}
+.notice,.cart,.intro{background:white;border-radius:14px;padding:15px;margin:12px 0}
+.notice{font-size:14px}
+.tools{display:flex;gap:8px;margin:12px 0}
+input,select{font:inherit;padding:11px;border:1px solid #ccd6cc;border-radius:8px;min-width:0}
+#search{width:100%}
+.tools select{width:100%}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.item{background:white;border-radius:12px;padding:12px;box-shadow:0 2px 8px #0000000b}
+.item h3{font-size:16px;margin:3px 0 8px}
+.price{color:#176b36;font-weight:bold;margin:7px 0}
+.item select{width:100%;margin:5px 0}
+.item button,.action{background:#176b36;color:white;border:0;border-radius:8px;padding:10px;font-weight:bold;cursor:pointer}
+.item button{width:100%;margin-top:5px}
+.small{font-size:12px;color:#68776a}
+.cartline{padding:10px 0;border-bottom:1px solid #e4e9e2}
+.cartline button{border:0;background:#fbe8e8;color:#a31f1f;border-radius:6px;padding:6px}
+.total{font-size:22px;font-weight:bold}
+.order{display:block;width:100%;padding:14px;background:#168746;color:white;text-align:center;text-decoration:none;border-radius:10px;font-weight:bold;margin-top:12px}
+footer{text-align:center;padding:20px;color:#667568}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+<h1>🥬 VEGBOX</h1>
+<p>FRESH VEG, HAPPY FAMILY</p>
+<p>ગોંડલમાં તાજા શાકભાજીની હોમ ડિલિવરી</p>
+</header>
+<main>
+<section class="intro">
+<h2>ખેતરમાંથી સીધું તમારા ઘરે!</h2>
+<p>તમને જોઈતું શાકભાજી પસંદ કરો, વજન પસંદ કરો અને WhatsApp પર ઑર્ડર મોકલો.</p>
+</section>
+<div class="notice">📌 ભાવ રૂપિયા પ્રતિ કિલો છે, સિવાય કે વસ્તુની બાજુમાં “જૂડી” લખેલું હોય. “ભાવ પૂછો” લખેલી વસ્તુનો ભાવ WhatsApp પર જાણી શકશો.</div>
+<h2>🛒 શાકભાજીની યાદી</h2>
+<input id="search" placeholder="શાકભાજી શોધો..." oninput="render()">
+<div class="tools">
+<select id="filter" onchange="render()">
+<option value="all">બધાં શાકભાજી</option>
+<option value="priced">ભાવ ઉપલબ્ધ</option>
+<option value="ask">ભાવ પૂછો</option>
+</select>
+</div>
+<div class="grid" id="products"></div>
+<section class="cart">
+<h2>તમારો ઑર્ડર</h2>
+<div id="cart">હજુ કોઈ વસ્તુ પસંદ કરી નથી.</div>
+<p class="total">કુલ: ₹<span id="total">0</span></p>
+<p class="small">જે વસ્તુનો ભાવ ઉપલબ્ધ નથી, તેની રકમ કુલમાં ગણાતી નથી.</p>
+<h3>ગ્રાહકની માહિતી</h3>
+<input id="customer" placeholder="તમારું નામ">
+<input id="phone" placeholder="મોબાઇલ નંબર" inputmode="numeric">
+<input id="address" placeholder="ઘરનું પૂરું સરનામું, ગોંડલ">
+<a class="order" href="#" onclick="sendOrder(event)">📲 WhatsApp પર ઑર્ડર કરો</a>
+</section>
+</main>
+<footer>VEGBOX • Gondal, Gujarat</footer>
+<script>
+const vegs=[
+["અળવીના પાન",null,"કિલો"],["આંબા હળદર",null,"કિલો"],["આદુ",120,"કિલો"],
+["કંટોલા",null,"કિલો"],["કાકડી",50,"કિલો"],["કાચા કેળા",40,"કિલો"],
+["કાચા પપૈયા",null,"કિલો"],["કાચી કેરી",null,"કિલો"],["કારેલા",40,"કિલો"],
+["કોબીચ",25,"કિલો"],["કોથમરી",30,"જૂડી"],["કોળું",30,"કિલો"],
+["ખીરા કાકડી",null,"કિલો"],["ગલકા",null,"કિલો"],["ગાજર",50,"કિલો"],
+["ગુવાર",100,"કિલો"],["ચોળી",60,"કિલો"],["ટીંડોળા",50,"કિલો"],
+["ડુંગળી",60,"કિલો"],["તાંજરીઓ",20,"કિલો"],["તુરીયા",40,"કિલો"],
+["તુવેરની શીંગ",null,"કિલો"],["દાણા વાળી ચોળી",null,"કિલો"],
+["દૂધી",20,"કિલો"],["દેશી ગાજર",null,"કિલો"],["દેશી ટામેટાં",40,"કિલો"],
+["ધોલર મરચાં",50,"કિલો"],["નાના બટેકા",15,"કિલો"],["નાના રીંગણા",30,"કિલો"],
+["નાની ડુંગળી",null,"કિલો"],["પરવળ",null,"કિલો"],["પાલક",15,"જૂડી"],
+["પીળા સિમલા મરચાં",null,"કિલો"],["પીળી ડુંગળી",null,"કિલો"],
+["પેપ્સી મરચાં",40,"કિલો"],["ફણસી",150,"કિલો"],["ફુદીનો",15,"જૂડી"],
+["ફૂલાવર",40,"કિલો"],["બટેકા",20,"કિલો"],["બીટ",50,"કિલો"],
+["બેબી કોર્ન",null,"કિલો"],["બ્રોકોલી",null,"કિલો"],["ભીંડો",60,"કિલો"],
+["મરચાં",20,"કિલો"],["મશરૂમ",null,"કિલો"],["મૂળા",20,"કિલો"],
+["મેથી",15,"જૂડી"],["રતાળુ",null,"કિલો"],["રીંગણા",30,"કિલો"],
+["લસણ",null,"કિલો"],["લાલ કોબીચ",null,"કિલો"],["લાલ બટેકા",null,"કિલો"],
+["લાલ મરચાં",80,"કિલો"],["લાલ સિમલા મરચાં",null,"કિલો"],
+["લાંબા ટામેટાં",40,"કિલો"],["લાંબા નાના ટામેટાં",null,"કિલો"],
+["લાંબા રીંગણા",null,"કિલો"],["લીલા વટાણા",180,"કિલો"],
+["લીલા વાલ",60,"કિલો"],["લીલી ડુંગળી",60,"કિલો"],["લીંબુ",250,"કિલો"],
+["લીલી હળદર",null,"કિલો"],["લીલું લસણ",250,"કિલો"],["વાલોર",null,"કિલો"],
+["શક્કરિયા ગાજર",100,"કિલો"],["સરગવાની શીંગ",150,"કિલો"],
+["સિમલા મરચાં",80,"કિલો"],["સુરતી મરચી",60,"કિલો"],
+["સુવા",null,"જૂડી"],["સૂરન",100,"કિલો"]
+].map((v,i)=>({id:i,name:v[0],price:v[1],unit:v[2]}));
+
+const weights=[
+{label:"250 ગ્રામ",qty:0.25},
+{label:"500 ગ્રામ",qty:0.5},
+{label:"750 ગ્રામ",qty:0.75},
+{label:"1 કિલો",qty:1}
+];
+const cart={};
+const products=document.getElementById("products");
+
+function priceText(v){
+if(v.price===null)return "ભાવ પૂછો";
+return "₹"+v.price+" / "+v.unit;
+}
+function render(){
+const query=document.getElementById("search").value.trim().toLowerCase();
+const filter=document.getElementById("filter").value;
+products.innerHTML="";
+vegs.filter(v=>{
+const match=v.name.toLowerCase().includes(query);
+const category=filter==="all"||(filter==="priced"&&v.price!==null)||(filter==="ask"&&v.price===null);
+return match&&category;
+}).forEach(v=>{
+const div=document.createElement("div");
+div.className="item";
+const options=weights.map((w,i)=>`<option value="${i}">${w.label}</option>`).join("");
+div.innerHTML=`<h3>${v.name}</h3><div class="price">${priceText(v)}</div>
+<select id="w${v.id}" aria-label="${v.name}નું વજન">${options}</select>
+<input id="n${v.id}" type="number" min="1" step="1" value="1" aria-label="જથ્થો" style="width:100%">
+<div class="small">જથ્થો (પેકેટ/વજન મુજબ)</div>
+<button type="button" onclick="add(${v.id})">કાર્ટમાં ઉમેરો</button>`;
+products.appendChild(div);
+});
+}
+function add(id){
+const v=vegs.find(x=>x.id===id);
+const wi=Number(document.getElementById("w"+id).value);
+const count=Math.max(1,Math.floor(Number(document.getElementById("n"+id).value)||1));
+const w=weights[wi];
+const key=id+"-"+wi;
+if(!cart[key])cart[key]={v,weight:w, count:0};
+cart[key].count+=count;
+renderCart();
+}
+function renderCart(){
+const box=document.getElementById("cart");
+const entries=Object.entries(cart);
+if(!entries.length){box.textContent="હજુ કોઈ વસ્તુ પસંદ કરી નથી.";document.getElementById("total").textContent="0";return;}
+box.innerHTML="";
+let total=0;
+entries.forEach(([key,item])=>{
+const sub=item.v.price===null?null:item.v.price*item.weight.qty*item.count;
+if(sub!==null)total+=sub;
+const row=document.createElement("div");
+row.className="cartline";
+const amount=item.weight.qty*item.count;
+const unitLabel=item.v.unit==="જૂડી"?(item.weight.qty===1?"જૂડી":item.weight.label):item.weight.label;
+row.innerHTML=`<b>${item.v.name}</b><br>${unitLabel} × ${item.count} — ${sub===null?"ભાવ પૂછો":"₹"+sub.toFixed(2)}<br><button type="button">દૂર કરો</button>`;
+row.querySelector("button").onclick=()=>{delete cart[key];renderCart();};
+box.appendChild(row);
+});
+document.getElementById("total").textContent=total.toFixed(2);
+}
+function sendOrder(e){
+e.preventDefault();
+const entries=Object.values(cart);
+if(!entries.length){alert("પહેલાં શાકભાજી પસંદ કરો.");return;}
+const name=document.getElementById("customer").value.trim();
+const phone=document.getElementById("phone").value.trim();
+const address=document.getElementById("address").value.trim();
+if(!name||!phone||!address){alert("કૃપા કરીને નામ, મોબાઇલ નંબર અને સરનામું ભરો.");return;}
+let total=0,needsQuote=false;
+const lines=entries.map(item=>{
+const amount=item.weight.qty*item.count;
+const quantity=item.v.unit==="જૂડી"?`${amount} જૂડી`:`${amount} કિલો`;
+if(item.v.price===null){needsQuote=true;return `${item.v.name}: ${quantity} — ભાવ પૂછવો છે`;}
+const sub=item.v.price*amount;
+total+=sub;
+return `${item.v.name}: ${quantity} — ₹${sub.toFixed(2)}`;
+});
+const message=`VEGBOX ઓર્ડર\nનામ: ${name}\nમોબાઇલ: ${phone}\nસરનામું: ${address}\n\n${lines.join("\n")}\n\nકુલ જાણીતા ભાવ: ₹${total.toFixed(2)}${needsQuote?"\nનોંધ: કેટલીક વસ્તુઓના ભાવ પુષ્ટિ કરવાના બાકી છે.":""}`;
+window.open("https://wa.me/919054990590?text="+encodeURIComponent(message),"_blank");
+}
+render();
+</script>
+</body>
+</html>
